@@ -45,6 +45,7 @@
 
 #include "planner.h"
 #include "stepper/indirection.h"
+#include "stepper/cycles.h"
 #ifdef __AVR__
   #include "stepper/speed_lookuptable.h"
 #endif
@@ -52,6 +53,7 @@
 #if ENABLED(FT_MOTION)
   #include "ft_types.h"
 #endif
+<<<<<<< HEAD
 
 //
 // Estimate the amount of time the Stepper ISR will take to execute
@@ -109,8 +111,18 @@
 
   // And each stepper (start + stop pulse) takes in worst case
   #define ISR_STEPPER_CYCLES 100UL
+=======
+>>>>>>> bugfix-2.1.x
 
+// TODO: Review and ensure proper handling for special E axes with commands like M17/M18, stepper timeout, etc.
+#if ENABLED(MIXING_EXTRUDER)
+  #define E_STATES EXTRUDERS  // All steppers are set together for each mixer. (Currently limited to 1.)
+#elif HAS_SWITCHING_EXTRUDER
+  #define E_STATES E_STEPPERS // One stepper for every two EXTRUDERS. The last extruder can be non-switching.
+#elif HAS_PRUSA_MMU2
+  #define E_STATES E_STEPPERS // One E stepper shared with all EXTRUDERS, so setting any only sets one.
 #else
+<<<<<<< HEAD
   // Cycles to perform actions in START_TIMED_PULSE
   #define TIMER_READ_ADD_AND_STORE_CYCLES 13UL
 
@@ -257,6 +269,13 @@
 
 // Number of axes that could be enabled/disabled. Dual/multiple steppers are combined.
 #define ENABLE_COUNT (NUM_AXES + E_STEPPERS)
+=======
+  #define E_STATES E_STEPPERS // One stepper for each extruder, so each can be disabled individually.
+#endif
+
+// Number of axes that could be enabled/disabled. Dual/multiple steppers are combined.
+#define ENABLE_COUNT (NUM_AXES + E_STATES)
+>>>>>>> bugfix-2.1.x
 typedef bits_t(ENABLE_COUNT) ena_mask_t;
 
 // Axis flags type, for enabled state or other simple state
@@ -264,17 +283,22 @@ typedef struct {
   union {
     ena_mask_t bits;
     struct {
-      bool NUM_AXIS_LIST(X:1, Y:1, Z:1, I:1, J:1, K:1, U:1, V:1, W:1);
-      #if HAS_EXTRUDERS
-        bool LIST_N(EXTRUDERS, E0:1, E1:1, E2:1, E3:1, E4:1, E5:1, E6:1, E7:1);
+      #if NUM_AXES
+        bool NUM_AXIS_LIST(X:1, Y:1, Z:1, I:1, J:1, K:1, U:1, V:1, W:1);
+      #endif
+      #if E_STATES
+        bool LIST_N(E_STATES, E0:1, E1:1, E2:1, E3:1, E4:1, E5:1, E6:1, E7:1);
       #endif
     };
   };
 } stepper_flags_t;
 
+typedef bits_t(NUM_AXES + E_STATES) e_axis_bits_t;
+constexpr e_axis_bits_t e_axis_mask = (_BV(E_STATES) - 1) << NUM_AXES;
+
 // All the stepper enable pins
 constexpr pin_t ena_pins[] = {
-  NUM_AXIS_LIST(X_ENABLE_PIN, Y_ENABLE_PIN, Z_ENABLE_PIN, I_ENABLE_PIN, J_ENABLE_PIN, K_ENABLE_PIN, U_ENABLE_PIN, V_ENABLE_PIN, W_ENABLE_PIN),
+  NUM_AXIS_LIST_(X_ENABLE_PIN, Y_ENABLE_PIN, Z_ENABLE_PIN, I_ENABLE_PIN, J_ENABLE_PIN, K_ENABLE_PIN, U_ENABLE_PIN, V_ENABLE_PIN, W_ENABLE_PIN)
   LIST_N(E_STEPPERS, E0_ENABLE_PIN, E1_ENABLE_PIN, E2_ENABLE_PIN, E3_ENABLE_PIN, E4_ENABLE_PIN, E5_ENABLE_PIN, E6_ENABLE_PIN, E7_ENABLE_PIN)
 };
 
@@ -479,7 +503,7 @@ class Stepper {
 
   public:
 
-    #if EITHER(HAS_EXTRA_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
+    #if ANY(HAS_EXTRA_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       static bool separate_multi_axis;
     #endif
 
@@ -508,17 +532,17 @@ class Stepper {
     #endif
 
     #if ENABLED(FREEZE_FEATURE)
-      static bool frozen;                   // Set this flag to instantly freeze motion
+      static bool frozen;                 // Set this flag to instantly freeze motion
     #endif
 
   private:
 
-    static block_t* current_block;          // A pointer to the block currently being traced
+    static block_t* current_block;        // A pointer to the block currently being traced
 
-    static axis_bits_t last_direction_bits, // The next stepping-bits to be output
-                       axis_did_move;       // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
+    static AxisBits last_direction_bits,  // The next stepping-bits to be output
+                    axis_did_move;        // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
 
-    static bool abort_current_block;        // Signals to the stepper that current block should be aborted
+    static bool abort_current_block;      // Signals to the stepper that current block should be aborted
 
     #if ENABLED(X_DUAL_ENDSTOPS)
       static bool locked_X_motor, locked_X2_motor;
@@ -526,7 +550,7 @@ class Stepper {
     #if ENABLED(Y_DUAL_ENDSTOPS)
       static bool locked_Y_motor, locked_Y2_motor;
     #endif
-    #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
+    #if ANY(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       static bool locked_Z_motor, locked_Z2_motor
                   #if NUM_Z_STEPPERS >= 3
                     , locked_Z3_motor
@@ -564,7 +588,7 @@ class Stepper {
                     decelerate_after,       // The point from where we need to start decelerating
                     step_event_count;       // The total event count for the current block
 
-    #if EITHER(HAS_MULTI_EXTRUDER, MIXING_EXTRUDER)
+    #if ANY(HAS_MULTI_EXTRUDER, MIXING_EXTRUDER)
       static uint8_t stepper_extruder;
     #else
       static constexpr uint8_t stepper_extruder = 0;
@@ -601,7 +625,11 @@ class Stepper {
       static bool        la_active;        // Whether linear advance is used on the present segment.
     #endif
 
+<<<<<<< HEAD
     #if ENABLED(INTEGRATED_BABYSTEPPING)
+=======
+    #if ENABLED(BABYSTEPPING)
+>>>>>>> bugfix-2.1.x
       static constexpr hal_timer_t BABYSTEP_NEVER = HAL_TIMER_TYPE_MAX;
       static hal_timer_t nextBabystepISR;
     #endif
@@ -660,7 +688,7 @@ class Stepper {
       static void advance_isr();
     #endif
 
-    #if ENABLED(INTEGRATED_BABYSTEPPING)
+    #if ENABLED(BABYSTEPPING)
       // The Babystepping ISR phase
       static hal_timer_t babystepping_isr();
       FORCE_INLINE static void initiateBabystepping() {
@@ -713,11 +741,11 @@ class Stepper {
     // Quickly stop all steppers
     FORCE_INLINE static void quick_stop() { abort_current_block = true; }
 
-    // The direction of a single motor
-    FORCE_INLINE static bool motor_direction(const AxisEnum axis) { return TEST(last_direction_bits, axis); }
+    // The direction of a single motor. A true result indicates forward or positive motion.
+    FORCE_INLINE static bool motor_direction(const AxisEnum axis) { return last_direction_bits[axis]; }
 
     // The last movement direction was not null on the specified axis. Note that motor direction is not necessarily the same.
-    FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) { return TEST(axis_did_move, axis); }
+    FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) { return axis_did_move[axis]; }
 
     // Handle a triggered endstop
     static void endstop_triggered(const AxisEnum axis);
@@ -736,7 +764,7 @@ class Stepper {
       static void microstep_readings();
     #endif
 
-    #if EITHER(HAS_EXTRA_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
+    #if ANY(HAS_EXTRA_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       FORCE_INLINE static void set_separate_multi_axis(const bool state) { separate_multi_axis = state; }
     #endif
     #if ENABLED(X_DUAL_ENDSTOPS)
@@ -747,7 +775,7 @@ class Stepper {
       FORCE_INLINE static void set_y_lock(const bool state) { locked_Y_motor = state; }
       FORCE_INLINE static void set_y2_lock(const bool state) { locked_Y2_motor = state; }
     #endif
-    #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
+    #if ANY(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       FORCE_INLINE static void set_z1_lock(const bool state) { locked_Z_motor = state; }
       FORCE_INLINE static void set_z2_lock(const bool state) { locked_Z2_motor = state; }
       #if NUM_Z_STEPPERS >= 3
@@ -814,12 +842,12 @@ class Stepper {
     static void disable_all_steppers();
 
     // Update direction states for all steppers
-    static void set_directions();
+    static void apply_directions();
 
     // Set direction bits and update all stepper DIR states
-    static void set_directions(const axis_bits_t bits) {
+    static void set_directions(const AxisBits bits) {
       last_direction_bits = bits;
-      set_directions();
+      apply_directions();
     }
 
     #if ENABLED(FT_MOTION)

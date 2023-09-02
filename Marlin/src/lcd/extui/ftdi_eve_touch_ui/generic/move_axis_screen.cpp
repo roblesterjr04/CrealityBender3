@@ -37,7 +37,7 @@ void BaseMoveAxisScreen::onEntry() {
   // ourselves. The relative distances are reset to zero whenever this
   // screen is entered.
 
-  LOOP_L_N(i, ExtUI::extruderCount) {
+  for (uint8_t i = 0; i < ExtUI::extruderCount; ++i) {
     mydata.e_rel[i] = 0;
   }
   BaseNumericAdjustmentScreen::onEntry();
@@ -72,11 +72,12 @@ void MoveAxisScreen::onRedraw(draw_mode_t what) {
   w.increments();
 }
 
-bool BaseMoveAxisScreen::onTouchHeld(uint8_t tag) {
+bool BaseMoveAxisScreen::onTouchHeld(const uint8_t tag) {
   #define UI_INCREMENT_AXIS(axis) setManualFeedrate(axis, increment); UI_INCREMENT(AxisPosition_mm, axis);
   #define UI_DECREMENT_AXIS(axis) setManualFeedrate(axis, increment); UI_DECREMENT(AxisPosition_mm, axis);
   const float increment = getIncrement();
   switch (tag) {
+<<<<<<< HEAD
     case  2: UI_DECREMENT_AXIS(X); break;
     case  3: UI_INCREMENT_AXIS(X); break;
     #if HAS_EXTRUDERS
@@ -108,6 +109,41 @@ bool BaseMoveAxisScreen::onTouchHeld(uint8_t tag) {
         case 24: raiseZtoTop(); break;
       #endif
     #endif
+=======
+    #if HAS_X_AXIS
+      case  2: UI_DECREMENT_AXIS(X); break;
+      case  3: UI_INCREMENT_AXIS(X); break;
+    #endif
+    #if HAS_EXTRUDERS
+      // For extruders, also update relative distances.
+      case  8: UI_DECREMENT_AXIS(E0); mydata.e_rel[0] -= increment; break;
+      case  9: UI_INCREMENT_AXIS(E0); mydata.e_rel[0] += increment; break;
+      #if HAS_MULTI_EXTRUDER
+        case 10: UI_DECREMENT_AXIS(E1); mydata.e_rel[1] -= increment; break;
+        case 11: UI_INCREMENT_AXIS(E1); mydata.e_rel[1] += increment; break;
+        #if EXTRUDERS > 2
+          case 12: UI_DECREMENT_AXIS(E2); mydata.e_rel[2] -= increment; break;
+          case 13: UI_INCREMENT_AXIS(E2); mydata.e_rel[2] += increment; break;
+          #if EXTRUDERS > 3
+            case 14: UI_DECREMENT_AXIS(E3); mydata.e_rel[3] -= increment; break;
+            case 15: UI_INCREMENT_AXIS(E3); mydata.e_rel[3] += increment; break;
+          #endif
+        #endif
+      #endif
+    #endif
+    #if HAS_Y_AXIS
+      case  4: UI_DECREMENT_AXIS(Y); break;
+      case  5: UI_INCREMENT_AXIS(Y); break;
+      case 20: SpinnerDialogBox::enqueueAndWait(F("G28X")); break;
+      case 21: SpinnerDialogBox::enqueueAndWait(F("G28Y")); break;
+      #if HAS_Z_AXIS
+        case  6: UI_DECREMENT_AXIS(Z); break;
+        case  7: UI_INCREMENT_AXIS(Z); break;
+        case 22: SpinnerDialogBox::enqueueAndWait(F("G28Z")); break;
+        case 24: raiseZtoTop(); break;
+      #endif
+    #endif
+>>>>>>> bugfix-2.1.x
     case 23: SpinnerDialogBox::enqueueAndWait(F("G28")); break;
     default:
       return false;
@@ -120,20 +156,24 @@ void BaseMoveAxisScreen::raiseZtoTop() {
   setAxisPosition_mm(Z_MAX_POS - 5, Z, homing_feedrate.z);
 }
 
-float BaseMoveAxisScreen::getManualFeedrate(uint8_t axis, float increment_mm) {
+float BaseMoveAxisScreen::getManualFeedrate(const uint8_t axis, const_float_t increment_mm) {
   // Compute feedrate so that the tool lags the adjuster when it is
   // being held down, this allows enough margin for the planner to
   // connect segments and even out the motion.
   constexpr xyze_feedrate_t max_manual_feedrate = MANUAL_FEEDRATE;
-  return min(max_manual_feedrate[axis] / 60.0f, ABS(increment_mm * (TOUCH_REPEATS_PER_SECOND) * 0.80f));
+  return min(MMM_TO_MMS(max_manual_feedrate[axis]), ABS(increment_mm * (TOUCH_REPEATS_PER_SECOND) * 0.80f));
 }
 
-void BaseMoveAxisScreen::setManualFeedrate(ExtUI::axis_t axis, float increment_mm) {
+void BaseMoveAxisScreen::setManualFeedrate(const ExtUI::axis_t axis, const_float_t increment_mm) {
   ExtUI::setFeedrate_mm_s(getManualFeedrate(X_AXIS + (axis - ExtUI::X), increment_mm));
 }
 
 #if HAS_EXTRUDERS
+<<<<<<< HEAD
   void BaseMoveAxisScreen::setManualFeedrate(ExtUI::extruder_t, float increment_mm) {
+=======
+  void BaseMoveAxisScreen::setManualFeedrate(const ExtUI::extruder_t, const_float_t increment_mm) {
+>>>>>>> bugfix-2.1.x
     ExtUI::setFeedrate_mm_s(getManualFeedrate(E_AXIS, increment_mm));
   }
 #endif

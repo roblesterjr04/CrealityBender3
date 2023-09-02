@@ -25,7 +25,7 @@
 
 #include "../../MarlinCore.h"
 
-#if BOTH(FWRETRACT, FWRETRACT_AUTORETRACT)
+#if ALL(FWRETRACT, FWRETRACT_AUTORETRACT)
   #include "../../feature/fwretract.h"
 #endif
 
@@ -72,7 +72,11 @@ void GcodeSuite::G0_G1(TERN_(HAS_FAST_MOVES, const bool fast_move/*=false*/)) {
     }
   #endif
 
+<<<<<<< HEAD
   #if BOTH(FWRETRACT, FWRETRACT_AUTORETRACT)
+=======
+  #if ALL(FWRETRACT, FWRETRACT_AUTORETRACT)
+>>>>>>> bugfix-2.1.x
 
     if (MIN_AUTORETRACT <= MAX_AUTORETRACT) {
       // When M209 Autoretract is enabled, convert E-only moves to firmware retract/recover moves
@@ -91,7 +95,11 @@ void GcodeSuite::G0_G1(TERN_(HAS_FAST_MOVES, const bool fast_move/*=false*/)) {
 
   #endif // FWRETRACT
 
+<<<<<<< HEAD
   #if EITHER(IS_SCARA, POLAR)
+=======
+  #if ANY(IS_SCARA, POLAR)
+>>>>>>> bugfix-2.1.x
     fast_move ? prepare_fast_move_to_destination() : prepare_line_to_destination();
   #else
     prepare_line_to_destination();

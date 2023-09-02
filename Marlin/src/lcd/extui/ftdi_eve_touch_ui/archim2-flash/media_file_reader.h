@@ -24,14 +24,18 @@
 
 #include "../../../../inc/MarlinConfigPre.h"
 
-#if ENABLED(SDSUPPORT)
+#if HAS_MEDIA
   #include "../../../../sd/SdFile.h"
   #include "../../../../sd/cardreader.h"
 #endif
 
 class MediaFileReader {
   private:
+<<<<<<< HEAD
     #if ENABLED(SDSUPPORT)
+=======
+    #if HAS_MEDIA
+>>>>>>> bugfix-2.1.x
       MediaFile root, file;
     #endif
 

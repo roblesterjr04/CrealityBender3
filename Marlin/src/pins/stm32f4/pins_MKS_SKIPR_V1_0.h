@@ -54,6 +54,7 @@
 #define E2_DIAG_PIN                         PB14  // Z+
 
 //
+<<<<<<< HEAD
 // Check for additional used endstop pins
 //
 #if HAS_EXTRA_ENDSTOPS
@@ -71,11 +72,13 @@
 #endif
 
 //
+=======
+>>>>>>> bugfix-2.1.x
 // Limit Switches
 //
 #ifdef X_STALL_SENSITIVITY
   #define X_STOP_PIN                  X_DIAG_PIN  // X-
-#elif EITHER(DUAL_X_CARRIAGE, NEEDS_X_MINMAX)
+#elif NEEDS_X_MINMAX
   #ifndef X_MIN_PIN
     #define X_MIN_PIN                 X_DIAG_PIN  // X-
   #endif
@@ -113,7 +116,7 @@
 #endif
 
 #if DISABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN) || ENABLED(USE_PROBE_FOR_Z_HOMING)
-  #ifndef Z_MIN_PROBE
+  #ifndef Z_MIN_PROBE_PIN
     #define Z_MIN_PROBE_PIN          E2_DIAG_PIN  // defaults to 'Z+' connector
   #endif
 #endif
@@ -228,8 +231,11 @@
   #define E3_SERIAL_RX_PIN      E3_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
-  #define TMC_BAUD_RATE                    19200
-#endif
+  #ifndef TMC_BAUD_RATE
+    #define TMC_BAUD_RATE                  19200
+  #endif
+
+#endif // HAS_TMC_UART
 
 /**               ------                                      ------
  * (BEEPER) PB2  | 1  2 | PE10 (BTN_ENC)         (MISO) PA6  | 1  2 | PA5  (SCK)
@@ -262,7 +268,7 @@
 // SD Support
 // Onboard SD card use hardware SPI3 (defined in variant), LCD SD card use hardware SPI1
 //
-#if ENABLED(SDSUPPORT)
+#if HAS_MEDIA
   #ifndef SDCARD_CONNECTION
     #define SDCARD_CONNECTION                LCD
   #endif
@@ -307,7 +313,7 @@
     #define BTN_EN1                  EXP1_03_PIN
     #define BTN_EN2                  EXP1_05_PIN
 
-    #define LCD_PINS_ENABLE          EXP1_08_PIN
+    #define LCD_PINS_EN              EXP1_08_PIN
     #define LCD_PINS_D4              EXP1_06_PIN
 
   #else
@@ -317,7 +323,7 @@
     #define BTN_EN1                  EXP2_03_PIN
     #define BTN_EN2                  EXP2_05_PIN
 
-    #define LCD_PINS_ENABLE          EXP1_03_PIN
+    #define LCD_PINS_EN              EXP1_03_PIN
     #define LCD_PINS_D4              EXP1_05_PIN
 
     #if ENABLED(FYSETC_MINI_12864)
@@ -325,7 +331,7 @@
       #define DOGLCD_A0              EXP1_04_PIN
       //#define LCD_BACKLIGHT_PIN           -1
       #define LCD_RESET_PIN          EXP1_05_PIN  // Must be high or open for LCD to operate normally.
-      #if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
+      #if ANY(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
         #ifndef RGB_LED_R_PIN
           #define RGB_LED_R_PIN      EXP1_06_PIN
         #endif

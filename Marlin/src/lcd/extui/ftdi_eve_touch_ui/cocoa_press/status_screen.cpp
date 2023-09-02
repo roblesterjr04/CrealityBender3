@@ -271,22 +271,40 @@ void StatusScreen::draw_file(draw_mode_t what) {
   if (what & FOREGROUND) {
     cmd.cmd(COLOR_RGB(bg_text_enabled));
 
+<<<<<<< HEAD
     if(!isMediaInserted())
       draw_text_with_ellipsis(cmd, TEXT_POS(x, y, w, h), F("No media present"), OPT_CENTERY, font_small);
     else if(isFileSelected()) {
       FileList list;
       draw_text_with_ellipsis(cmd, TEXT_POS(x, y, w, h), list.filename(), OPT_CENTERY, font_small);
     } else
+=======
+    if (!isMediaInserted())
+      draw_text_with_ellipsis(cmd, TEXT_POS(x, y, w, h), F("No media present"), OPT_CENTERY, font_small);
+    else if (isFileSelected()) {
+      FileList list;
+      draw_text_with_ellipsis(cmd, TEXT_POS(x, y, w, h), list.filename(), OPT_CENTERY, font_small);
+    }
+    else
+>>>>>>> bugfix-2.1.x
       draw_text_with_ellipsis(cmd, TEXT_POS(x, y, w, h), F("No file selected"), OPT_CENTERY, font_small);
   }
 }
 
 bool StatusScreen::isFileSelected() {
+<<<<<<< HEAD
   if(!isMediaInserted()) return false;
   FileList list;
   if(list.isDir()) return false;
   const char *filename = list.filename();
   if(filename[0] == '\0') return false;
+=======
+  if (!isMediaInserted()) return false;
+  FileList list;
+  if (list.isDir()) return false;
+  const char *filename = list.filename();
+  if (filename[0] == '\0') return false;
+>>>>>>> bugfix-2.1.x
   return true;
 }
 
@@ -368,8 +386,7 @@ void StatusScreen::setStatusMessage(const char * const) {
 void StatusScreen::onIdle() {
   reset_menu_timeout();
   if (refresh_timer.elapsed(STATUS_UPDATE_INTERVAL)) {
-    if (!EventLoop::is_touch_held())
-      onRefresh();
+    if (!EventLoop::is_touch_held()) onRefresh();
     refresh_timer.start();
   }
 }

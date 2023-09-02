@@ -64,8 +64,16 @@
   #define E3_SERIAL_RX_PIN      E3_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
+<<<<<<< HEAD
   #define TMC_BAUD_RATE                    19200
 #endif
+=======
+  #ifndef TMC_BAUD_RATE
+    #define TMC_BAUD_RATE                  19200
+  #endif
+
+#endif // HAS_TMC_UART
+>>>>>>> bugfix-2.1.x
 
 //
 // NeoPixel LED

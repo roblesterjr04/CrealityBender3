@@ -115,6 +115,7 @@
 //
 #define SD_DETECT_PIN                       PC7
 
+<<<<<<< HEAD
 #ifndef SDIO_SUPPORT
   #define SDIO_SUPPORT
 #endif
@@ -123,6 +124,16 @@
   // SPI
   //
   #define SPI_DEVICE                        -1
+=======
+#ifndef ONBOARD_SDIO
+  #define ONBOARD_SDIO
+#endif
+#if ENABLED(ONBOARD_SDIO)
+  //
+  // SPI
+  //
+  #define SPI_DEVICE                        -1   // Maple
+>>>>>>> bugfix-2.1.x
   #define SCK_PIN                           -1
   #define MISO_PIN                          -1
   #define MOSI_PIN                          -1

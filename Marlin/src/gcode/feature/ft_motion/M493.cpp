@@ -28,6 +28,7 @@
 #include "../../../module/ft_motion.h"
 
 void say_shaping() {
+<<<<<<< HEAD
   SERIAL_ECHO_TERNARY(fxdTiCtrl.cfg_mode, "Fixed time controller ", "en", "dis", "abled");
   if (fxdTiCtrl.cfg_mode == ftMotionMode_DISABLED || fxdTiCtrl.cfg_mode == ftMotionMode_ENABLED) {
     SERIAL_ECHOLNPGM(".");
@@ -48,6 +49,100 @@ void say_shaping() {
     }
     SERIAL_ECHOLNPGM(" shaping.");
   #endif
+=======
+  // FT Enabled
+  SERIAL_ECHO_TERNARY(fxdTiCtrl.cfg.mode, "Fixed-Time Motion ", "en", "dis", "abled");
+
+  // FT Shaping
+  #if HAS_X_AXIS
+    if (fxdTiCtrl.cfg.mode > ftMotionMode_ENABLED) {
+      SERIAL_ECHOPGM(" with ");
+      switch (fxdTiCtrl.cfg.mode) {
+        default: break;
+        case ftMotionMode_ZV:   SERIAL_ECHOPGM("ZV");        break;
+        case ftMotionMode_ZVD:  SERIAL_ECHOPGM("ZVD");       break;
+        case ftMotionMode_EI:   SERIAL_ECHOPGM("EI");        break;
+        case ftMotionMode_2HEI: SERIAL_ECHOPGM("2 Hump EI"); break;
+        case ftMotionMode_3HEI: SERIAL_ECHOPGM("3 Hump EI"); break;
+        case ftMotionMode_MZV:  SERIAL_ECHOPGM("MZV");       break;
+        //case ftMotionMode_DISCTF: SERIAL_ECHOPGM("discrete transfer functions"); break;
+        //case ftMotionMode_ULENDO_FBS: SERIAL_ECHOPGM("Ulendo FBS."); return;
+      }
+      SERIAL_ECHOPGM(" shaping");
+    }
+  #endif
+  SERIAL_ECHOLNPGM(".");
+
+  const bool z_based = TERN0(HAS_DYNAMIC_FREQ_MM, fxdTiCtrl.cfg.dynFreqMode == dynFreqMode_Z_BASED),
+             g_based = TERN0(HAS_DYNAMIC_FREQ_G,  fxdTiCtrl.cfg.dynFreqMode == dynFreqMode_MASS_BASED),
+             dynamic = z_based || g_based;
+
+  // FT Dynamic Frequency Mode
+  if (fxdTiCtrl.cfg.modeHasShaper()) {
+    #if HAS_DYNAMIC_FREQ
+      SERIAL_ECHOPGM("Dynamic Frequency Mode ");
+      switch (fxdTiCtrl.cfg.dynFreqMode) {
+        default:
+        case dynFreqMode_DISABLED: SERIAL_ECHOPGM("disabled"); break;
+        #if HAS_DYNAMIC_FREQ_MM
+          case dynFreqMode_Z_BASED: SERIAL_ECHOPGM("Z-based"); break;
+        #endif
+        #if HAS_DYNAMIC_FREQ_G
+          case dynFreqMode_MASS_BASED: SERIAL_ECHOPGM("Mass-based"); break;
+        #endif
+      }
+      SERIAL_ECHOLNPGM(".");
+    #endif
+
+    #if HAS_X_AXIS
+      SERIAL_ECHO_TERNARY(dynamic, "X/A ", "base dynamic", "static", " compensator frequency: ");
+      SERIAL_ECHO(p_float_t(fxdTiCtrl.cfg.baseFreq[X_AXIS], 2), F("Hz"));
+      #if HAS_DYNAMIC_FREQ
+        if (dynamic) SERIAL_ECHO(" scaling: ", p_float_t(fxdTiCtrl.cfg.dynFreqK[X_AXIS], 8), F("Hz/"), z_based ? F("mm") : F("g"));
+      #endif
+      SERIAL_EOL();
+    #endif
+
+    #if HAS_Y_AXIS
+      SERIAL_ECHO_TERNARY(dynamic, "Y/B ", "base dynamic", "static", " compensator frequency: ");
+      SERIAL_ECHO(p_float_t(fxdTiCtrl.cfg.baseFreq[Y_AXIS], 2), F(" Hz"));
+      #if HAS_DYNAMIC_FREQ
+        if (dynamic) SERIAL_ECHO(F(" scaling: "), p_float_t(fxdTiCtrl.cfg.dynFreqK[Y_AXIS], 8), F("Hz/"), z_based ? F("mm") : F("g"));
+      #endif
+      SERIAL_EOL();
+    #endif
+  }
+
+  #if HAS_EXTRUDERS
+    SERIAL_ECHO_TERNARY(fxdTiCtrl.cfg.linearAdvEna, "Linear Advance ", "en", "dis", "abled");
+    SERIAL_ECHOLN(F(". Gain: "), p_float_t(fxdTiCtrl.cfg.linearAdvK, 5));
+  #endif
+}
+
+void GcodeSuite::M493_report(const bool forReplay/*=true*/) {
+  report_heading_etc(forReplay, F(STR_FT_MOTION));
+  const ft_config_t &c = fxdTiCtrl.cfg;
+  SERIAL_ECHOPGM("  M493 S", c.mode);
+  #if HAS_X_AXIS
+    SERIAL_ECHOPGM(" A", c.baseFreq[X_AXIS]);
+    #if HAS_Y_AXIS
+      SERIAL_ECHOPGM(" B", c.baseFreq[Y_AXIS]);
+    #endif
+  #endif
+  #if HAS_DYNAMIC_FREQ
+    SERIAL_ECHOPGM(" D", c.dynFreqMode);
+    #if HAS_X_AXIS
+      SERIAL_ECHOPGM(" F", c.dynFreqK[X_AXIS]);
+      #if HAS_Y_AXIS
+        SERIAL_ECHOPGM(" H", c.dynFreqK[Y_AXIS]);
+      #endif
+    #endif
+  #endif
+  #if HAS_EXTRUDERS
+    SERIAL_ECHOPGM(" P", c.linearAdvEna, " K", c.linearAdvK);
+  #endif
+  SERIAL_EOL();
+>>>>>>> bugfix-2.1.x
 }
 
 /**
@@ -79,6 +174,7 @@ void say_shaping() {
  *    H<Hz> Set frequency scaling for the Y axis
  */
 void GcodeSuite::M493() {
+<<<<<<< HEAD
   // Parse 'S' mode parameter.
   if (parser.seenval('S')) {
     const ftMotionMode_t val = (ftMotionMode_t)parser.value_byte();
@@ -118,6 +214,41 @@ void GcodeSuite::M493() {
         //case ftMotionMode_DISCTF:
       #endif
       default: break;
+=======
+  struct { bool update_n:1, update_a:1, reset_ft:1, report_h:1; } flag = { false };
+
+  if (!parser.seen_any())
+    flag.report_h = true;
+  else
+    planner.synchronize();
+
+  // Parse 'S' mode parameter.
+  if (parser.seenval('S')) {
+    const ftMotionMode_t oldmm = fxdTiCtrl.cfg.mode,
+                         newmm = (ftMotionMode_t)parser.value_byte();
+
+    if (newmm != oldmm) {
+      switch (newmm) {
+        default: SERIAL_ECHOLNPGM("?Invalid control mode [S] value."); return;
+        #if HAS_X_AXIS
+          case ftMotionMode_ZV:
+          case ftMotionMode_ZVD:
+          case ftMotionMode_EI:
+          case ftMotionMode_2HEI:
+          case ftMotionMode_3HEI:
+          case ftMotionMode_MZV:
+          //case ftMotionMode_ULENDO_FBS:
+          //case ftMotionMode_DISCTF:
+            flag.update_n = flag.update_a = true;
+        #endif
+        case ftMotionMode_DISABLED:
+        case ftMotionMode_ENABLED:
+          fxdTiCtrl.cfg.mode = newmm;
+          flag.report_h = true;
+          if (oldmm == ftMotionMode_DISABLED) flag.reset_ft = true;
+          break;
+      }
+>>>>>>> bugfix-2.1.x
     }
   }
 
@@ -126,14 +257,20 @@ void GcodeSuite::M493() {
     // Pressure control (linear advance) parameter.
     if (parser.seen('P')) {
       const bool val = parser.value_bool();
+<<<<<<< HEAD
       fxdTiCtrl.cfg_linearAdvEna = val;
       SERIAL_ECHO_TERNARY(val, "Pressure control: Linear Advance ", "en", "dis", "abled.\n");
+=======
+      fxdTiCtrl.cfg.linearAdvEna = val;
+      SERIAL_ECHO_TERNARY(val, "Linear Advance ", "en", "dis", "abled.\n");
+>>>>>>> bugfix-2.1.x
     }
 
     // Pressure control (linear advance) gain parameter.
     if (parser.seenval('K')) {
       const float val = parser.value_float();
       if (val >= 0.0f) {
+<<<<<<< HEAD
         fxdTiCtrl.cfg_linearAdvK = val;
         SERIAL_ECHOPGM("Pressure control: Linear Advance gain set to: ");
         SERIAL_ECHO_F(val, 5);
@@ -142,10 +279,18 @@ void GcodeSuite::M493() {
       else { // Value out of range.
         SERIAL_ECHOLNPGM("Pressure control: Linear Advance gain out of range.");
       }
+=======
+        fxdTiCtrl.cfg.linearAdvK = val;
+        flag.report_h = true;
+      }
+      else // Value out of range.
+        SERIAL_ECHOLNPGM("Linear Advance gain out of range.");
+>>>>>>> bugfix-2.1.x
     }
 
   #endif // HAS_EXTRUDERS
 
+<<<<<<< HEAD
   #if HAS_Z_AXIS || HAS_EXTRUDERS
 
     // Dynamic frequency mode parameter.
@@ -167,6 +312,29 @@ void GcodeSuite::M493() {
             case dynFreqMode_MASS_BASED:
               fxdTiCtrl.cfg_dynFreqMode = val;
               SERIAL_ECHOLNPGM("Mass-based Dynamic Frequency Mode.");
+=======
+  #if HAS_DYNAMIC_FREQ
+
+    // Dynamic frequency mode parameter.
+    if (parser.seenval('D')) {
+      if (fxdTiCtrl.cfg.modeHasShaper()) {
+        const dynFreqMode_t val = dynFreqMode_t(parser.value_byte());
+        switch (val) {
+          case dynFreqMode_DISABLED:
+            fxdTiCtrl.cfg.dynFreqMode = val;
+            flag.report_h = true;
+            break;
+          #if HAS_DYNAMIC_FREQ_MM
+            case dynFreqMode_Z_BASED:
+              fxdTiCtrl.cfg.dynFreqMode = val;
+              flag.report_h = true;
+              break;
+          #endif
+          #if HAS_DYNAMIC_FREQ_G
+            case dynFreqMode_MASS_BASED:
+              fxdTiCtrl.cfg.dynFreqMode = val;
+              flag.report_h = true;
+>>>>>>> bugfix-2.1.x
               break;
           #endif
           default:
@@ -175,16 +343,30 @@ void GcodeSuite::M493() {
         }
       }
       else {
+<<<<<<< HEAD
         SERIAL_ECHOLNPGM("Incompatible shaper for [D] Dynamic Frequency mode.");
       }
     }
 
   #endif // HAS_Z_AXIS || HAS_EXTRUDERS
+=======
+        SERIAL_ECHOLNPGM("?Wrong shaper for [D] Dynamic Frequency mode.");
+      }
+    }
+
+    const bool modeUsesDynFreq = (
+         TERN0(HAS_DYNAMIC_FREQ_MM, fxdTiCtrl.cfg.dynFreqMode == dynFreqMode_Z_BASED)
+      || TERN0(HAS_DYNAMIC_FREQ_G,  fxdTiCtrl.cfg.dynFreqMode == dynFreqMode_MASS_BASED)
+    );
+
+  #endif // HAS_DYNAMIC_FREQ
+>>>>>>> bugfix-2.1.x
 
   #if HAS_X_AXIS
 
     // Parse frequency parameter (X axis).
     if (parser.seenval('A')) {
+<<<<<<< HEAD
       if (WITHIN(fxdTiCtrl.cfg_mode, 10U, 19U)) {
         const float val = parser.value_float();
         const bool frequencyInRange = WITHIN(val, FTM_MIN_SHAPE_FREQ, (FTM_FS) / 2);
@@ -227,6 +409,33 @@ void GcodeSuite::M493() {
         }
       }
     #endif // HAS_Z_AXIS || HAS_EXTRUDERS
+=======
+      if (fxdTiCtrl.cfg.modeHasShaper()) {
+        const float val = parser.value_float();
+        // TODO: Frequency minimum is dependent on the shaper used; the above check isn't always correct.
+        if (WITHIN(val, FTM_MIN_SHAPE_FREQ, (FTM_FS) / 2)) {
+          fxdTiCtrl.cfg.baseFreq[X_AXIS] = val;
+          flag.update_n = flag.reset_ft = flag.report_h = true;
+        }
+        else // Frequency out of range.
+          SERIAL_ECHOLNPGM("Invalid [", AS_CHAR('A'), "] frequency value.");
+      }
+      else // Mode doesn't use frequency.
+        SERIAL_ECHOLNPGM("Wrong mode for [", AS_CHAR('A'), "] frequency.");
+    }
+
+    #if HAS_DYNAMIC_FREQ
+      // Parse frequency scaling parameter (X axis).
+      if (parser.seenval('F')) {
+        if (modeUsesDynFreq) {
+          fxdTiCtrl.cfg.dynFreqK[X_AXIS] = parser.value_float();
+          flag.report_h = true;
+        }
+        else
+          SERIAL_ECHOLNPGM("Wrong mode for [", AS_CHAR('F'), "] frequency scaling.");
+      }
+    #endif
+>>>>>>> bugfix-2.1.x
 
   #endif // HAS_X_AXIS
 
@@ -234,6 +443,7 @@ void GcodeSuite::M493() {
 
     // Parse frequency parameter (Y axis).
     if (parser.seenval('B')) {
+<<<<<<< HEAD
       if (WITHIN(fxdTiCtrl.cfg_mode, 10U, 19U)) {
         const float val = parser.value_float();
         const bool frequencyInRange = WITHIN(val, FTM_MIN_SHAPE_FREQ, (FTM_FS) / 2);
@@ -277,6 +487,42 @@ void GcodeSuite::M493() {
     #endif // HAS_Z_AXIS || HAS_EXTRUDERS
 
   #endif // HAS_Y_AXIS
+=======
+      if (fxdTiCtrl.cfg.modeHasShaper()) {
+        const float val = parser.value_float();
+        if (WITHIN(val, FTM_MIN_SHAPE_FREQ, (FTM_FS) / 2)) {
+          fxdTiCtrl.cfg.baseFreq[Y_AXIS] = val;
+          flag.update_n = flag.reset_ft = flag.report_h = true;
+        }
+        else // Frequency out of range.
+          SERIAL_ECHOLNPGM("Invalid frequency [", AS_CHAR('B'), "] value.");
+      }
+      else // Mode doesn't use frequency.
+        SERIAL_ECHOLNPGM("Wrong mode for [", AS_CHAR('B'), "] frequency.");
+    }
+
+    #if HAS_DYNAMIC_FREQ
+      // Parse frequency scaling parameter (Y axis).
+      if (parser.seenval('H')) {
+        if (modeUsesDynFreq) {
+          fxdTiCtrl.cfg.dynFreqK[Y_AXIS] = parser.value_float();
+          flag.report_h = true;
+        }
+        else
+          SERIAL_ECHOLNPGM("Wrong mode for [", AS_CHAR('H'), "] frequency scaling.");
+      }
+    #endif
+
+  #endif // HAS_Y_AXIS
+
+  #if HAS_X_AXIS
+    if (flag.update_n) fxdTiCtrl.refreshShapingN();
+    if (flag.update_a) fxdTiCtrl.updateShapingA();
+  #endif
+  if (flag.reset_ft) fxdTiCtrl.reset();
+  if (flag.report_h) say_shaping();
+
+>>>>>>> bugfix-2.1.x
 }
 
 #endif // FT_MOTION

@@ -145,6 +145,7 @@
 #define ILI9488_RDEXTC      0xFB // Read EXTC command is SPI mode
 #define ILI9488_ADJCTL6     0xFC // Adjust Control 6
 #define ILI9488_ADJCTL7     0xFF // Adjust Control 7
+<<<<<<< HEAD
 
 #if 0
   // https://forum.mikroe.com/viewtopic.php?t=74586
@@ -155,6 +156,8 @@
     #define TFT_INTERFACE_FSMC
   #endif
 #endif
+=======
+>>>>>>> bugfix-2.1.x
 
 static const uint16_t ili9488_init[] = {
   DATASIZE_8BIT,

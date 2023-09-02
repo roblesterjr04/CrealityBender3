@@ -36,6 +36,10 @@
 #define DGUS_GCODE_LEN        32
 
 enum class DGUS_Addr : uint16_t {
+<<<<<<< HEAD
+=======
+  END                     = 0,
+>>>>>>> bugfix-2.1.x
   MESSAGE_Line1           = 0x1100, // 0x1100 - 0x111F
   MESSAGE_Line2           = 0x1120, // 0x1120 - 0x113F
   MESSAGE_Line3           = 0x1140, // 0x1140 - 0x115F

@@ -31,6 +31,7 @@
 using namespace ExtUI;
 
 namespace Anycubic {
+<<<<<<< HEAD
   class FileNavigator {
     public:
       FileNavigator();
@@ -53,5 +54,28 @@ namespace Anycubic {
       static uint8_t   folderdepth;
       static uint16_t  currentindex;
   };
+=======
+
+  class FileNavigator {
+    public:
+      static FileList filelist;
+
+      FileNavigator();
+      static void reset();
+      static void getFiles(uint16_t);
+      static void upDIR();
+      static void changeDIR(char *);
+      static void sendFile();
+      static void refresh();
+      static char* getCurrentDirPath();
+      static uint16_t getFileNum();
+    private:
+      static uint16_t lastindex;
+      static uint16_t currentindex;
+      static uint8_t  folderdepth;
+      static char     currentDirPath[MAX_PATH_LEN + 1];
+  };
+
+>>>>>>> bugfix-2.1.x
   extern FileNavigator filenavigator;
 }

@@ -77,7 +77,7 @@
   #define TMC_CLASS_E(N) TMC_CLASS(E##N, E)
 #endif
 
-#ifndef CHOPPER_TIMING_X
+#if HAS_X_AXIS && !defined(CHOPPER_TIMING_X)
   #define CHOPPER_TIMING_X CHOPPER_TIMING
 #endif
 #if HAS_Y_AXIS && !defined(CHOPPER_TIMING_Y)
@@ -115,8 +115,11 @@
 void restore_trinamic_drivers();
 void reset_trinamic_drivers();
 
+<<<<<<< HEAD
 #define AXIS_HAS_DEDGE(A) (AXIS_IS_TMC(A) && ENABLED(EDGE_STEPPING))
 
+=======
+>>>>>>> bugfix-2.1.x
 // X Stepper
 #if AXIS_IS_TMC(X)
   extern TMC_CLASS(X, X) stepperX;
@@ -296,7 +299,11 @@ void reset_trinamic_drivers();
     #define U_ENABLE_READ() stepperU.isEnabled()
   #endif
   #if AXIS_HAS_DEDGE(U)
+<<<<<<< HEAD
     #define U_STEP_WRITE(STATE) do{ if(STATE) TOGGLE(U_STEP_PIN); }while(0)
+=======
+    #define U_STEP_WRITE(STATE) do{ if (STATE) TOGGLE(U_STEP_PIN); }while(0)
+>>>>>>> bugfix-2.1.x
   #endif
 #endif
 
@@ -310,7 +317,11 @@ void reset_trinamic_drivers();
     #define V_ENABLE_READ() stepperV.isEnabled()
   #endif
   #if AXIS_HAS_DEDGE(V)
+<<<<<<< HEAD
     #define V_STEP_WRITE(STATE) do{ if(STATE) TOGGLE(V_STEP_PIN); }while(0)
+=======
+    #define V_STEP_WRITE(STATE) do{ if (STATE) TOGGLE(V_STEP_PIN); }while(0)
+>>>>>>> bugfix-2.1.x
   #endif
 #endif
 
@@ -324,7 +335,11 @@ void reset_trinamic_drivers();
     #define W_ENABLE_READ() stepperW.isEnabled()
   #endif
   #if AXIS_HAS_DEDGE(W)
+<<<<<<< HEAD
     #define W_STEP_WRITE(STATE) do{ if(STATE) TOGGLE(W_STEP_PIN); }while(0)
+=======
+    #define W_STEP_WRITE(STATE) do{ if (STATE) TOGGLE(W_STEP_PIN); }while(0)
+>>>>>>> bugfix-2.1.x
   #endif
 #endif
 

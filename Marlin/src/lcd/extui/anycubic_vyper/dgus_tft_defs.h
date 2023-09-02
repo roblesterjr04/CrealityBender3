@@ -19,11 +19,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+<<<<<<< HEAD
+=======
+#pragma once
+>>>>>>> bugfix-2.1.x
 
 /**
  * lcd/extui/anycubic_vyper/dgus_defs.h
  */
 
+<<<<<<< HEAD
 #pragma once
 #include "../../../inc/MarlinConfigPre.h"
 
@@ -118,6 +123,20 @@ namespace Anycubic {
     AC_heater_temp_set,
     AC_heater_temp_reached
   };
+=======
+#include "../anycubic/common_defs.h"
+
+// TFT panel commands
+#define AC_msg_bed_temp_abnormal        F("J28")
+
+// TFT panel messages
+#define MARLIN_msg_probing_point        PSTR("Probing Point ")
+#define MARLIN_msg_probe_preheat_start  PSTR("Probe preheat start")
+#define MARLIN_msg_probe_preheat_stop   PSTR("Probe preheat stop")
+#define MARLIN_msg_media_removed        PSTR("Media Removed")
+
+namespace Anycubic {
+>>>>>>> bugfix-2.1.x
 
   enum paused_state_t : uint8_t {
     AC_paused_heater_timed_out,
@@ -137,6 +156,7 @@ namespace Anycubic {
     AC_printer_resuming_from_power_outage
   };
 
+<<<<<<< HEAD
   enum timer_event_t : uint8_t {
     AC_timer_started,
     AC_timer_paused,
@@ -155,3 +175,6 @@ namespace Anycubic {
     AC_menu_change_to_command
   };
 }
+=======
+} // Anycubic
+>>>>>>> bugfix-2.1.x

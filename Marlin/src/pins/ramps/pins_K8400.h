@@ -53,7 +53,11 @@
 #define X_STOP_PIN                             3
 #define Y_STOP_PIN                            14
 
+<<<<<<< HEAD
 #if EITHER(BLTOUCH, TOUCH_MI_PROBE)
+=======
+#if ANY(BLTOUCH, TOUCH_MI_PROBE)
+>>>>>>> bugfix-2.1.x
   #define INVERTED_PROBE_STATE
 #endif
 

@@ -19,8 +19,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+<<<<<<< HEAD
 #pragma once
+=======
+#ifndef ENV_VALIDATE_H
+#define ENV_VALIDATE_H
+>>>>>>> bugfix-2.1.x
 
 #if NOT_TARGET(STM32G0xx) || NOT_TARGET(STM32G0B1xx)
   #error "Oops! Select an STM32G0 board in 'Tools > Board.'"
 #endif
+<<<<<<< HEAD
+=======
+
+#endif
+>>>>>>> bugfix-2.1.x

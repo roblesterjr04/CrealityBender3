@@ -33,7 +33,11 @@
 //
 // EEPROM
 //
+<<<<<<< HEAD
 #if EITHER(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+=======
+#if ANY(NO_EEPROM_SELECTED, FLASH_EEPROM_EMULATION)
+>>>>>>> bugfix-2.1.x
   #undef NO_EEPROM_SELECTED
   #ifndef FLASH_EEPROM_EMULATION
     #define FLASH_EEPROM_EMULATION
@@ -51,10 +55,15 @@
 //
 // Probe enable
 //
+<<<<<<< HEAD
 #if ENABLED(PROBE_ENABLE_DISABLE)
   #ifndef PROBE_ENABLE_PIN
     #define PROBE_ENABLE_PIN          SERVO0_PIN
   #endif
+=======
+#if ENABLED(PROBE_ENABLE_DISABLE) && !defined(PROBE_ENABLE_PIN)
+  #define PROBE_ENABLE_PIN            SERVO0_PIN
+>>>>>>> bugfix-2.1.x
 #endif
 
 //
@@ -76,6 +85,7 @@
 #endif
 
 //
+<<<<<<< HEAD
 // Check for additional used endstop pins
 //
 #if HAS_EXTRA_ENDSTOPS
@@ -90,6 +100,8 @@
 #endif
 
 //
+=======
+>>>>>>> bugfix-2.1.x
 // Limit Switches
 //
 #ifdef X_STALL_SENSITIVITY
@@ -99,7 +111,11 @@
   #else
     #define X_MIN_PIN                E0_DIAG_PIN  // MIN5
   #endif
+<<<<<<< HEAD
 #elif EITHER(DUAL_X_CARRIAGE, NEEDS_X_MINMAX)
+=======
+#elif NEEDS_X_MINMAX
+>>>>>>> bugfix-2.1.x
   #ifndef X_MIN_PIN
     #define X_MIN_PIN                 X_DIAG_PIN  // MIN1
   #endif
@@ -117,7 +133,11 @@
   #else
     #define Y_MIN_PIN                E1_DIAG_PIN  // MIN6
   #endif
+<<<<<<< HEAD
 #elif ENABLED(NEEDS_Y_MINMAX)
+=======
+#elif NEEDS_Y_MINMAX
+>>>>>>> bugfix-2.1.x
   #ifndef Y_MIN_PIN
     #define Y_MIN_PIN                 Y_DIAG_PIN  // MIN2
   #endif
@@ -208,8 +228,16 @@
   #define E0_SERIAL_RX_PIN      E0_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
+<<<<<<< HEAD
   #define TMC_BAUD_RATE                    19200
 #endif
+=======
+  #ifndef TMC_BAUD_RATE
+    #define TMC_BAUD_RATE                  19200
+  #endif
+
+#endif // HAS_TMC_UART
+>>>>>>> bugfix-2.1.x
 
 //
 // Temperature Sensors
@@ -319,7 +347,11 @@
     #define BTN_EN1                  EXP1_03_PIN
     #define BTN_EN2                  EXP1_05_PIN
 
+<<<<<<< HEAD
     #define LCD_PINS_ENABLE          EXP1_08_PIN
+=======
+    #define LCD_PINS_EN              EXP1_08_PIN
+>>>>>>> bugfix-2.1.x
     #define LCD_PINS_D4              EXP1_06_PIN
 
   #elif ENABLED(MKS_MINI_12864)
@@ -336,7 +368,11 @@
     #define BTN_EN1                  EXP2_03_PIN
     #define BTN_EN2                  EXP2_05_PIN
 
+<<<<<<< HEAD
     #define LCD_PINS_ENABLE          EXP1_03_PIN
+=======
+    #define LCD_PINS_EN              EXP1_03_PIN
+>>>>>>> bugfix-2.1.x
     #define LCD_PINS_D4              EXP1_05_PIN
 
     #if ENABLED(FYSETC_MINI_12864)
@@ -348,7 +384,11 @@
                                                   //   results in LCD soft SPI mode 3, SD soft SPI mode 0
 
       #define LCD_RESET_PIN          EXP1_05_PIN  // Must be high or open for LCD to operate normally.
+<<<<<<< HEAD
       #if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
+=======
+      #if ANY(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
+>>>>>>> bugfix-2.1.x
         #ifndef RGB_LED_R_PIN
           #define RGB_LED_R_PIN      EXP1_06_PIN
         #endif
